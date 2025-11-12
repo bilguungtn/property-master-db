@@ -1,114 +1,11 @@
 {
-  "id": "3791c03a-fa25-40df-9099-20b21cbc3b20",
+  "id": "091ba811-025d-4043-bfdb-6b3de86d9d0d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.properties": {
-      "name": "properties",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "uuid": {
-          "name": "uuid",
-          "type": "char(36)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "properties_building_id": {
-          "name": "properties_building_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "room_number": {
-          "name": "room_number",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "room_size": {
-          "name": "room_size",
-          "type": "double precision",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "direction_code": {
-          "name": "direction_code",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "layout_amount": {
-          "name": "layout_amount",
-          "type": "double precision",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "layout_type_code": {
-          "name": "layout_type_code",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "floor": {
-          "name": "floor",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "properties_properties_building_id_properties_building_id_fk": {
-          "name": "properties_properties_building_id_properties_building_id_fk",
-          "tableFrom": "properties",
-          "tableTo": "properties_building",
-          "columnsFrom": [
-            "properties_building_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "properties_uuid_unique": {
-          "name": "properties_uuid_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "uuid"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.properties_building": {
-      "name": "properties_building",
+    "public.buildings": {
+      "name": "buildings",
       "schema": "",
       "columns": {
         "id": {
@@ -125,13 +22,13 @@
         },
         "building_type_code": {
           "name": "building_type_code",
-          "type": "integer",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
         },
         "structure_type_code": {
           "name": "structure_type_code",
-          "type": "integer",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
         },
@@ -181,8 +78,8 @@
         }
       },
       "indexes": {
-        "properties_building_prefecture_code_idx": {
-          "name": "properties_building_prefecture_code_idx",
+        "buildings_prefecture_code_idx": {
+          "name": "buildings_prefecture_code_idx",
           "columns": [
             {
               "expression": "prefecture_code",
@@ -196,8 +93,8 @@
           "method": "btree",
           "with": {}
         },
-        "properties_building_city_code_idx": {
-          "name": "properties_building_city_code_idx",
+        "buildings_city_code_idx": {
+          "name": "buildings_city_code_idx",
           "columns": [
             {
               "expression": "city_code",
@@ -281,7 +178,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -326,7 +223,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -387,7 +284,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -525,7 +422,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -590,7 +487,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -642,7 +539,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -728,7 +625,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -748,9 +645,9 @@
           "primaryKey": true,
           "notNull": true
         },
-        "property_id": {
-          "name": "property_id",
-          "type": "integer",
+        "room_uuid": {
+          "name": "room_uuid",
+          "type": "char(36)",
           "primaryKey": false,
           "notNull": true
         },
@@ -772,9 +669,15 @@
           "primaryKey": false,
           "notNull": false
         },
-        "available_move_in_date": {
-          "name": "available_move_in_date",
-          "type": "date",
+        "available_move_in_year": {
+          "name": "available_move_in_year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "available_move_in_month": {
+          "name": "available_move_in_month",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -813,11 +716,11 @@
         }
       },
       "indexes": {
-        "property_listings_property_id_idx": {
-          "name": "property_listings_property_id_idx",
+        "property_listings_room_uuid_idx": {
+          "name": "property_listings_room_uuid_idx",
           "columns": [
             {
-              "expression": "property_id",
+              "expression": "room_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -845,17 +748,17 @@
         }
       },
       "foreignKeys": {
-        "property_listings_property_id_properties_id_fk": {
-          "name": "property_listings_property_id_properties_id_fk",
+        "property_listings_room_uuid_rooms_uuid_fk": {
+          "name": "property_listings_room_uuid_rooms_uuid_fk",
           "tableFrom": "property_listings",
-          "tableTo": "properties",
+          "tableTo": "rooms",
           "columnsFrom": [
-            "property_id"
+            "room_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "property_listings_store_id_stores_id_fk": {
@@ -868,7 +771,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -882,14 +785,8 @@
       "name": "property_locations",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "properties_building_id": {
-          "name": "properties_building_id",
+        "building_id": {
+          "name": "building_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -940,17 +837,17 @@
         }
       },
       "foreignKeys": {
-        "property_locations_properties_building_id_properties_building_id_fk": {
-          "name": "property_locations_properties_building_id_properties_building_id_fk",
+        "property_locations_building_id_buildings_id_fk": {
+          "name": "property_locations_building_id_buildings_id_fk",
           "tableFrom": "property_locations",
-          "tableTo": "properties_building",
+          "tableTo": "buildings",
           "columnsFrom": [
-            "properties_building_id"
+            "building_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1033,7 +930,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1053,8 +950,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "properties_building_id": {
-          "name": "properties_building_id",
+        "building_id": {
+          "name": "building_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -1067,6 +964,12 @@
         },
         "station_id": {
           "name": "station_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "railroad_id": {
+          "name": "railroad_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -1137,17 +1040,17 @@
         }
       },
       "foreignKeys": {
-        "property_routes_properties_building_id_properties_building_id_fk": {
-          "name": "property_routes_properties_building_id_properties_building_id_fk",
+        "property_routes_building_id_buildings_id_fk": {
+          "name": "property_routes_building_id_buildings_id_fk",
           "tableFrom": "property_routes",
-          "tableTo": "properties_building",
+          "tableTo": "buildings",
           "columnsFrom": [
-            "properties_building_id"
+            "building_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1167,8 +1070,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "properties_building_id": {
-          "name": "properties_building_id",
+        "building_id": {
+          "name": "building_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -1220,17 +1123,125 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "property_translations_properties_building_id_properties_building_id_fk": {
-          "name": "property_translations_properties_building_id_properties_building_id_fk",
+        "property_translations_building_id_buildings_id_fk": {
+          "name": "property_translations_building_id_buildings_id_fk",
           "tableFrom": "property_translations",
-          "tableTo": "properties_building",
+          "tableTo": "buildings",
           "columnsFrom": [
-            "properties_building_id"
+            "building_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.rooms": {
+      "name": "rooms",
+      "schema": "",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "char(36)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "building_id": {
+          "name": "building_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "store_id": {
+          "name": "store_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "room_number": {
+          "name": "room_number",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "room_size": {
+          "name": "room_size",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "direction_code": {
+          "name": "direction_code",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "layout_amount": {
+          "name": "layout_amount",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "layout_type_code": {
+          "name": "layout_type_code",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "floor": {
+          "name": "floor",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "rooms_building_id_buildings_id_fk": {
+          "name": "rooms_building_id_buildings_id_fk",
+          "tableFrom": "rooms",
+          "tableTo": "buildings",
+          "columnsFrom": [
+            "building_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "rooms_store_id_stores_id_fk": {
+          "name": "rooms_store_id_stores_id_fk",
+          "tableFrom": "rooms",
+          "tableTo": "stores",
+          "columnsFrom": [
+            "store_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
