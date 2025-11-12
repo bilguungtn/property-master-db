@@ -15,4 +15,4 @@ logs
 .env.*.local
 
 # Drizzle
-drizzle/
+#drizzle/
