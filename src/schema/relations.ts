@@ -76,10 +76,7 @@ export const propertyListingsRelations = relations(
       fields: [propertyListings.propertyId],
       references: [properties.id],
     }),
-    costs: one(propertyCosts, {
-      fields: [propertyListings.id],
-      references: [propertyCosts.listingId],
-    }),
+    costs: many(propertyCosts),
     facilities: many(propertyFacilities),
     conditions: many(propertyConditions),
     images: many(propertyImages),
@@ -87,10 +84,7 @@ export const propertyListingsRelations = relations(
     dealings: many(propertyDealings),
     advertisementFees: many(propertyAdvertisementFees),
     advertisementReprints: many(propertyAdvertisementReprints),
-    monthlies: one(propertyMonthlies, {
-      fields: [propertyListings.id],
-      references: [propertyMonthlies.listingId],
-    }),
+    monthlies: many(propertyMonthlies),
   }),
 );
 

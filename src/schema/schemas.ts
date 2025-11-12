@@ -147,8 +147,8 @@ export const propertyListings = pgTable(
     propertyNextUpdateAt: timestamp("property_next_update_at"),
     availableMoveInDate: date("available_move_in_date"),
     availableMoveInTimingCode: integer("available_move_in_timing_code").notNull(),
-    isActive: smallinteger("is_active").notNull().default(1),
-    storeId: smallinteger("store_id").notNull(),
+    isActive: smallint("is_active").notNull().default(1),
+    storeId: smallint("store_id").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
@@ -163,13 +163,12 @@ export const propertyListings = pgTable(
 );
 
 /**
- * Property Costs - Pricing and fees for listings (one-to-one with listing)
+ * Property Costs - Pricing and fees for listings (one-to-many with listing)
  */
 export const propertyCosts = pgTable("property_costs", {
   id: serial("id").primaryKey(),
   listingId: integer("listing_id")
     .notNull()
-    .unique()
     .references(() => propertyListings.id),
   rent: integer("rent"),
   managementFee: integer("management_fee"),
@@ -184,7 +183,7 @@ export const propertyCosts = pgTable("property_costs", {
   depositRepaymentFeePercent: doublePrecision("deposit_repayment_fee_percent"),
   renewalFeeAmount: doublePrecision("renewal_fee_amount"),
   renewalFeeTypeCode: integer("renewal_fee_type_code"),
-  residenceInsuranceNeeded: smallinteger("residence_insurance_needed")
+  residenceInsuranceNeeded: smallint("residence_insurance_needed")
     .notNull()
     .default(1),
   createdAt: timestamp("created_at").defaultNow(),
@@ -307,11 +306,11 @@ export const propertyAdvertisementReprints = pgTable(
 );
 
 /**
- * Property Monthlies - Monthly rental options (one-to-one with listing)
+ * Property Monthlies - Monthly rental options (one-to-many with listing)
  */
 export const propertyMonthlies = pgTable("property_monthlies", {
+  id: serial("id").primaryKey(),
   listingId: integer("listing_id")
-    .primaryKey()
     .notNull()
     .references(() => propertyListings.id),
   isMonthly: integer("is_monthly"),
