@@ -1,6 +1,6 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import * as schema from './schema';
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "./schema";
 
 /**
  * Create a database connection
@@ -11,7 +11,7 @@ export function createDatabaseClient(connectionString?: string) {
   const url =
     connectionString ||
     process.env.PROPERTY_DATABASE_URL ||
-    'postgresql://postgres:postgres@localhost:5432/property_db';
+    "postgresql://postgres:postgres@localhost:5432/property_db";
 
   const queryClient = postgres(url);
   const db = drizzle(queryClient, { schema });

@@ -1,4 +1,4 @@
-import { getDatabase, closeDatabase } from '../client';
+import { getDatabase, closeDatabase } from "../client";
 import {
   propertiesBuilding,
   properties,
@@ -7,13 +7,13 @@ import {
   propertyTranslations,
   propertyListings,
   propertyCosts,
-} from '../schema';
+} from "../schema";
 
 /**
  * Seed the database with sample data
  */
 async function seed() {
-  console.log('🌱 Starting database seed...');
+  console.log("🌱 Starting database seed...");
 
   const db = getDatabase();
 
@@ -22,51 +22,51 @@ async function seed() {
     const [building] = await db
       .insert(propertiesBuilding)
       .values({
-        buildingName: 'Sample Tower',
+        buildingName: "Sample Tower",
         buildingTypeCode: 1,
         structureTypeCode: 1,
         builtYear: 2020,
         builtMonth: 6,
         maxFloor: 10,
-        prefectureCode: '13',
-        cityCode: '101',
+        prefectureCode: "13",
+        cityCode: "101",
       })
       .returning();
 
-    console.log('✅ Created building:', building.id);
+    console.log("✅ Created building:", building.id);
 
     // Create a location for the building
     await db.insert(propertyLocations).values({
       propertiesBuildingId: building.id,
-      longitude: '139.7671248',
-      latitude: '35.6812362',
+      longitude: "139.7671248",
+      latitude: "35.6812362",
     });
 
-    console.log('✅ Created location for building');
+    console.log("✅ Created location for building");
 
     // Create a route for the building
     await db.insert(propertyRoutes).values({
       propertiesBuildingId: building.id,
-      stationCode: 'ST001',
+      stationCode: "ST001",
       stationId: 1,
-      railroadCode: 'RR001',
+      railroadCode: "RR001",
       transportationTypeCode: 1,
       minutes: 5,
     });
 
-    console.log('✅ Created route for building');
+    console.log("✅ Created route for building");
 
     // Create a translation for the building
     await db.insert(propertyTranslations).values({
       propertiesBuildingId: building.id,
-      locale: 'en',
-      addressDetail: '1-1-1 Sample Street, Tokyo',
-      remarks: 'Modern building in central location',
-      sideNote: 'Near shopping and restaurants',
-      catchphrase: 'Your perfect home awaits!',
+      locale: "en",
+      addressDetail: "1-1-1 Sample Street, Tokyo",
+      remarks: "Modern building in central location",
+      sideNote: "Near shopping and restaurants",
+      catchphrase: "Your perfect home awaits!",
     });
 
-    console.log('✅ Created translation for building');
+    console.log("✅ Created translation for building");
 
     // Create a sample property (room)
     const [property] = await db
@@ -74,7 +74,7 @@ async function seed() {
       .values({
         uuid: crypto.randomUUID(),
         propertiesBuildingId: building.id,
-        roomNumber: '101',
+        roomNumber: "101",
         roomSize: 45.5,
         directionCode: 1,
         layoutAmount: 2,
@@ -83,7 +83,7 @@ async function seed() {
       })
       .returning();
 
-    console.log('✅ Created property:', property.id);
+    console.log("✅ Created property:", property.id);
 
     // Create a listing for the property
     const [listing] = await db
@@ -97,7 +97,7 @@ async function seed() {
       })
       .returning();
 
-    console.log('✅ Created listing:', listing.id);
+    console.log("✅ Created listing:", listing.id);
 
     // Create costs for the listing
     await db.insert(propertyCosts).values({
@@ -111,11 +111,11 @@ async function seed() {
       residenceInsuranceNeeded: 1,
     });
 
-    console.log('✅ Created costs for listing');
+    console.log("✅ Created costs for listing");
 
-    console.log('✨ Seed completed successfully!');
+    console.log("✨ Seed completed successfully!");
   } catch (error) {
-    console.error('❌ Seed failed:', error);
+    console.error("❌ Seed failed:", error);
     process.exit(1);
   } finally {
     closeDatabase();

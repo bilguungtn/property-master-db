@@ -1,5 +1,5 @@
-// Export immutable schemas
-export * from './immutable-schemas';
+// Export all schemas
+export * from "./schemas";
 
-// Export changeable schemas
-export * from './changeable-schemas';
+// Export all relations
+export * from "./relations";
