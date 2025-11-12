@@ -1,0 +1,2 @@
+ALTER TABLE "properties" ADD COLUMN "store_id" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "properties" ADD CONSTRAINT "properties_store_id_stores_id_fk" FOREIGN KEY ("store_id") REFERENCES "public"."stores"("id") ON DELETE no action ON UPDATE no action;

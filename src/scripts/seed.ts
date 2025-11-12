@@ -1,5 +1,6 @@
 import { getDatabase, closeDatabase } from "../client";
 import {
+  stores,
   propertiesBuilding,
   properties,
   propertyLocations,
@@ -24,6 +25,14 @@ async function seed() {
   const db = getDatabase();
 
   try {
+    // ============================================
+    // CREATE STORE
+    // ============================================
+
+    const [store] = await db.insert(stores).values({}).returning();
+
+    console.log("✅ Created store:", store.id);
+
     // ============================================
     // CREATE BUILDING WITH IMMUTABLE DATA
     // ============================================
@@ -83,6 +92,7 @@ async function seed() {
       .values({
         uuid: crypto.randomUUID(),
         propertiesBuildingId: building.id,
+        storeId: store.id,
         roomNumber: "101",
         roomSize: 45.5,
         directionCode: 1,
@@ -98,6 +108,7 @@ async function seed() {
       .values({
         uuid: crypto.randomUUID(),
         propertiesBuildingId: building.id,
+        storeId: store.id,
         roomNumber: "201",
         roomSize: 55.0,
         directionCode: 2,
@@ -119,8 +130,8 @@ async function seed() {
         propertyId: property1.id,
         publishedAt: new Date("2024-01-01"),
         availableMoveInTimingCode: 1,
-        isActive: 1,
-        storeId: 1,
+        isActive: true,
+        storeId: store.id,
       })
       .returning();
 
@@ -136,7 +147,7 @@ async function seed() {
         depositMonth: 1,
         gratuityFeePrice: 120000,
         gratuityFeeMonth: 1,
-        residenceInsuranceNeeded: 1,
+        residenceInsuranceNeeded: true,
       },
       {
         listingId: listing1.id,
@@ -146,7 +157,7 @@ async function seed() {
         depositMonth: 1,
         gratuityFeePrice: 125000,
         gratuityFeeMonth: 1,
-        residenceInsuranceNeeded: 1,
+        residenceInsuranceNeeded: true,
       },
     ]);
 
@@ -199,15 +210,15 @@ async function seed() {
 
     // Facilities for listing 1
     await db.insert(propertyFacilities).values([
-      { listingId: listing1.id, code: 1, status: 1 }, // Elevator
-      { listingId: listing1.id, code: 2, status: 1 }, // Parking
-      { listingId: listing1.id, code: 3, status: 1 }, // Auto-lock
+      { listingId: listing1.id, code: 1 }, // Elevator
+      { listingId: listing1.id, code: 2 }, // Parking
+      { listingId: listing1.id, code: 3 }, // Auto-lock
     ]);
 
     // Conditions for listing 1
     await db.insert(propertyConditions).values([
-      { listingId: listing1.id, code: 1, status: 1 }, // Earthquake-resistant
-      { listingId: listing1.id, code: 2, status: 1 }, // Fire-resistant
+      { listingId: listing1.id, code: 1 }, // Earthquake-resistant
+      { listingId: listing1.id, code: 2 }, // Fire-resistant
     ]);
 
     // Campaign for listing 1
@@ -220,6 +231,7 @@ async function seed() {
     await db.insert(propertyDealings).values({
       listingId: listing1.id,
       code: 1, // Rental only
+      type: "dealing",
     });
 
     console.log("✅ Created images, facilities, conditions, campaign, and dealing for listing 1");
@@ -234,8 +246,8 @@ async function seed() {
         propertyId: property2.id,
         publishedAt: new Date("2024-02-01"),
         availableMoveInTimingCode: 1,
-        isActive: 1,
-        storeId: 1,
+        isActive: true,
+        storeId: store.id,
       })
       .returning();
 
@@ -251,7 +263,7 @@ async function seed() {
         depositMonth: 1,
         gratuityFeePrice: 150000,
         gratuityFeeMonth: 1,
-        residenceInsuranceNeeded: 1,
+        residenceInsuranceNeeded: true,
       },
     ]);
 
@@ -287,19 +299,20 @@ async function seed() {
 
     // Facilities for listing 2
     await db.insert(propertyFacilities).values([
-      { listingId: listing2.id, code: 1, status: 1 }, // Elevator
-      { listingId: listing2.id, code: 4, status: 1 }, // Balcony
+      { listingId: listing2.id, code: 1 }, // Elevator
+      { listingId: listing2.id, code: 4 }, // Balcony
     ]);
 
     // Conditions for listing 2
     await db.insert(propertyConditions).values([
-      { listingId: listing2.id, code: 1, status: 1 }, // Earthquake-resistant
+      { listingId: listing2.id, code: 1 }, // Earthquake-resistant
     ]);
 
     console.log("✅ Created complete data for listing 2");
 
     console.log("✨ Seed completed successfully!");
     console.log("📊 Summary:");
+    console.log("   - 1 store");
     console.log("   - 1 building with location, route, and translation");
     console.log("   - 2 properties (rooms)");
     console.log("   - 2 listings with full details");

@@ -1,11 +1,11 @@
 import {
+  boolean,
   date,
   decimal,
   index,
   integer,
   pgTable,
   serial,
-  smallint,
   timestamp,
   varchar,
   doublePrecision,
@@ -18,6 +18,15 @@ import {
 // Physical Property Characteristics
 // These tables represent physical building and property information that rarely changes
 // ============================================
+
+/**
+ * Stores - Property management stores
+ */
+export const stores = pgTable("stores", {
+  id: serial("id").primaryKey(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 /**
  * Buildings - Physical building information
@@ -54,6 +63,9 @@ export const properties = pgTable("properties", {
   propertiesBuildingId: integer("properties_building_id")
     .notNull()
     .references(() => propertiesBuilding.id),
+  storeId: integer("store_id")
+    .notNull()
+    .references(() => stores.id),
   roomNumber: varchar("room_number", { length: 255 }),
   roomSize: doublePrecision("room_size"),
   directionCode: integer("direction_code"),
@@ -146,9 +158,13 @@ export const propertyListings = pgTable(
     propertyUpdatedAt: timestamp("property_updated_at"),
     propertyNextUpdateAt: timestamp("property_next_update_at"),
     availableMoveInDate: date("available_move_in_date"),
-    availableMoveInTimingCode: integer("available_move_in_timing_code").notNull(),
-    isActive: smallint("is_active").notNull().default(1),
-    storeId: smallint("store_id").notNull(),
+    availableMoveInTimingCode: integer(
+      "available_move_in_timing_code",
+    ).notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    storeId: integer("store_id")
+      .notNull()
+      .references(() => stores.id),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
@@ -183,9 +199,9 @@ export const propertyCosts = pgTable("property_costs", {
   depositRepaymentFeePercent: doublePrecision("deposit_repayment_fee_percent"),
   renewalFeeAmount: doublePrecision("renewal_fee_amount"),
   renewalFeeTypeCode: integer("renewal_fee_type_code"),
-  residenceInsuranceNeeded: smallint("residence_insurance_needed")
+  residenceInsuranceNeeded: boolean("residence_insurance_needed")
     .notNull()
-    .default(1),
+    .default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -199,9 +215,8 @@ export const propertyFacilities = pgTable("property_facilities", {
     .notNull()
     .references(() => propertyListings.id),
   code: integer("code").notNull(),
-  status: integer("status").notNull(),
+  // status: integer("status").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 /**
@@ -213,9 +228,8 @@ export const propertyConditions = pgTable("property_conditions", {
     .notNull()
     .references(() => propertyListings.id),
   code: integer("code").notNull(),
-  status: integer("status").notNull(),
+  // status: integer("status").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 /**
@@ -260,7 +274,7 @@ export const propertyCampaigns = pgTable(
 );
 
 /**
- * Property Dealings - Transaction types
+ * Property Dealings - Transaction types and advertisement reprints
  */
 export const propertyDealings = pgTable("property_dealings", {
   id: serial("id").primaryKey(),
@@ -268,6 +282,7 @@ export const propertyDealings = pgTable("property_dealings", {
     .notNull()
     .references(() => propertyListings.id),
   code: integer("code").notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // 'dealing' or 'advertisement_reprint'
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -284,22 +299,7 @@ export const propertyAdvertisementFees = pgTable(
       .references(() => propertyListings.id),
     amount: integer("amount").notNull(),
     code: integer("code").notNull(),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at").defaultNow(),
-  },
-);
-
-/**
- * Property Advertisement Reprints - Reprint permissions
- */
-export const propertyAdvertisementReprints = pgTable(
-  "property_advertisement_reprints",
-  {
-    id: serial("id").primaryKey(),
-    listingId: integer("listing_id")
-      .notNull()
-      .references(() => propertyListings.id),
-    code: integer("code").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },

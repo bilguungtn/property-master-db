@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  stores,
   propertiesBuilding,
   properties,
   propertyLocations,
@@ -13,13 +14,17 @@ import {
   propertyCampaigns,
   propertyDealings,
   propertyAdvertisementFees,
-  propertyAdvertisementReprints,
   propertyMonthlies,
 } from "./schemas";
 
 // ============================================
 // RELATIONS - IMMUTABLE SCHEMAS
 // ============================================
+
+export const storesRelations = relations(stores, ({ many }) => ({
+  properties: many(properties),
+  listings: many(propertyListings),
+}));
 
 export const propertiesBuildingRelations = relations(
   propertiesBuilding,
@@ -35,6 +40,10 @@ export const propertiesRelations = relations(properties, ({ one, many }) => ({
   building: one(propertiesBuilding, {
     fields: [properties.propertiesBuildingId],
     references: [propertiesBuilding.id],
+  }),
+  store: one(stores, {
+    fields: [properties.storeId],
+    references: [stores.id],
   }),
 }));
 
@@ -76,6 +85,10 @@ export const propertyListingsRelations = relations(
       fields: [propertyListings.propertyId],
       references: [properties.id],
     }),
+    store: one(stores, {
+      fields: [propertyListings.storeId],
+      references: [stores.id],
+    }),
     costs: many(propertyCosts),
     facilities: many(propertyFacilities),
     conditions: many(propertyConditions),
@@ -83,7 +96,6 @@ export const propertyListingsRelations = relations(
     campaigns: many(propertyCampaigns),
     dealings: many(propertyDealings),
     advertisementFees: many(propertyAdvertisementFees),
-    advertisementReprints: many(propertyAdvertisementReprints),
     monthlies: many(propertyMonthlies),
   }),
 );
@@ -147,16 +159,6 @@ export const propertyAdvertisementFeesRelations = relations(
   ({ one }) => ({
     listing: one(propertyListings, {
       fields: [propertyAdvertisementFees.listingId],
-      references: [propertyListings.id],
-    }),
-  }),
-);
-
-export const propertyAdvertisementReprintsRelations = relations(
-  propertyAdvertisementReprints,
-  ({ one }) => ({
-    listing: one(propertyListings, {
-      fields: [propertyAdvertisementReprints.listingId],
       references: [propertyListings.id],
     }),
   }),
