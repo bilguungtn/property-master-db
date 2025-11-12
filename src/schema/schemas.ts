@@ -31,13 +31,13 @@ export const stores = pgTable("stores", {
 /**
  * Buildings - Physical building information
  */
-export const propertiesBuilding = pgTable(
-  "properties_building",
+export const buildings = pgTable(
+  "buildings",
   {
     id: serial("id").primaryKey(),
     buildingName: varchar("building_name", { length: 255 }).notNull(),
-    buildingTypeCode: integer("building_type_code").notNull(),
-    structureTypeCode: integer("structure_type_code").notNull(),
+    buildingTypeCode: varchar("building_type_code", { length: 50 }).notNull(),
+    structureTypeCode: varchar("structure_type_code", { length: 50 }).notNull(),
     builtYear: integer("built_year"),
     builtMonth: integer("built_month"),
     maxFloor: integer("max_floor"),
@@ -47,25 +47,24 @@ export const propertiesBuilding = pgTable(
     updatedAt: timestamp("updated_at").defaultNow(),
   },
   (table) => ({
-    prefectureCodeIdx: index("properties_building_prefecture_code_idx").on(
+    prefectureCodeIdx: index("buildings_prefecture_code_idx").on(
       table.prefectureCode,
     ),
-    cityCodeIdx: index("properties_building_city_code_idx").on(table.cityCode),
+    cityCodeIdx: index("buildings_city_code_idx").on(table.cityCode),
   }),
 );
 
 /**
- * Properties (Rooms) - Individual units/rooms in buildings
+ * Rooms - Individual units/rooms in buildings
  */
-export const properties = pgTable("properties", {
-  id: serial("id").primaryKey(),
-  uuid: char("uuid", { length: 36 }).notNull().unique(),
-  propertiesBuildingId: integer("properties_building_id")
+export const rooms = pgTable("rooms", {
+  uuid: char("uuid", { length: 36 }).primaryKey(),
+  buildingId: integer("building_id")
     .notNull()
-    .references(() => propertiesBuilding.id),
+    .references(() => buildings.id, { onDelete: "cascade" }),
   storeId: integer("store_id")
     .notNull()
-    .references(() => stores.id),
+    .references(() => stores.id, { onDelete: "cascade" }),
   roomNumber: varchar("room_number", { length: 255 }),
   roomSize: doublePrecision("room_size"),
   directionCode: integer("direction_code"),
@@ -82,10 +81,9 @@ export const properties = pgTable("properties", {
 export const propertyLocations = pgTable(
   "property_locations",
   {
-    id: serial("id").primaryKey(),
-    propertiesBuildingId: integer("properties_building_id")
+    buildingId: integer("building_id")
       .notNull()
-      .references(() => propertiesBuilding.id),
+      .references(() => buildings.id, { onDelete: "cascade" }),
     longitude: decimal("longitude", { precision: 10, scale: 7 }).notNull(),
     latitude: decimal("latitude", { precision: 10, scale: 7 }).notNull(),
   },
@@ -102,11 +100,12 @@ export const propertyRoutes = pgTable(
   "property_routes",
   {
     id: serial("id").primaryKey(),
-    propertiesBuildingId: integer("properties_building_id")
+    buildingId: integer("building_id")
       .notNull()
-      .references(() => propertiesBuilding.id),
+      .references(() => buildings.id, { onDelete: "cascade" }),
     stationCode: varchar("station_code", { length: 255 }),
     stationId: integer("station_id").notNull(),
+    railroadId: integer("railroad_id").notNull(),
     railroadCode: varchar("railroad_code", { length: 255 }).notNull(),
     transportationTypeCode: integer("transportation_type_code").notNull(),
     minutes: integer("minutes").notNull(),
@@ -126,9 +125,9 @@ export const propertyRoutes = pgTable(
  */
 export const propertyTranslations = pgTable("property_translations", {
   id: serial("id").primaryKey(),
-  propertiesBuildingId: integer("properties_building_id")
+  buildingId: integer("building_id")
     .notNull()
-    .references(() => propertiesBuilding.id),
+    .references(() => buildings.id, { onDelete: "cascade" }),
   locale: varchar("locale", { length: 255 }).notNull(),
   addressDetail: varchar("address_detail", { length: 255 }),
   remarks: varchar("remarks", { length: 1000 }),
@@ -145,32 +144,33 @@ export const propertyTranslations = pgTable("property_translations", {
 // ============================================
 
 /**
- * Property Listings - Rental listings for properties
+ * Property Listings - Rental listings for rooms
  */
 export const propertyListings = pgTable(
   "property_listings",
   {
     id: serial("id").primaryKey(),
-    propertyId: integer("property_id")
+    roomUuid: char("room_uuid", { length: 36 })
       .notNull()
-      .references(() => properties.id),
+      .references(() => rooms.uuid, { onDelete: "cascade" }),
     publishedAt: timestamp("published_at"),
     propertyUpdatedAt: timestamp("property_updated_at"),
     propertyNextUpdateAt: timestamp("property_next_update_at"),
-    availableMoveInDate: date("available_move_in_date"),
+    availableMoveInYear: integer("available_move_in_year"),
+    availableMoveInMonth: integer("available_move_in_month"),
     availableMoveInTimingCode: integer(
       "available_move_in_timing_code",
     ).notNull(),
     isActive: boolean("is_active").notNull().default(true),
     storeId: integer("store_id")
       .notNull()
-      .references(() => stores.id),
+      .references(() => stores.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
   (table) => ({
-    propertyIdIdx: index("property_listings_property_id_idx").on(
-      table.propertyId,
+    roomUuidIdx: index("property_listings_room_uuid_idx").on(
+      table.roomUuid,
     ),
     publishedAtIdx: index("property_listings_published_at_idx").on(
       table.publishedAt,
@@ -185,7 +185,7 @@ export const propertyCosts = pgTable("property_costs", {
   id: serial("id").primaryKey(),
   listingId: integer("listing_id")
     .notNull()
-    .references(() => propertyListings.id),
+    .references(() => propertyListings.id, { onDelete: "cascade" }),
   rent: integer("rent"),
   managementFee: integer("management_fee"),
   depositPrice: integer("deposit_price"),
@@ -213,7 +213,7 @@ export const propertyFacilities = pgTable("property_facilities", {
   id: serial("id").primaryKey(),
   listingId: integer("listing_id")
     .notNull()
-    .references(() => propertyListings.id),
+    .references(() => propertyListings.id, { onDelete: "cascade" }),
   code: integer("code").notNull(),
   // status: integer("status").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -226,7 +226,7 @@ export const propertyConditions = pgTable("property_conditions", {
   id: serial("id").primaryKey(),
   listingId: integer("listing_id")
     .notNull()
-    .references(() => propertyListings.id),
+    .references(() => propertyListings.id, { onDelete: "cascade" }),
   code: integer("code").notNull(),
   // status: integer("status").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -241,7 +241,7 @@ export const propertyImages = pgTable(
     id: char("id", { length: 36 }).primaryKey(),
     listingId: integer("listing_id")
       .notNull()
-      .references(() => propertyListings.id),
+      .references(() => propertyListings.id, { onDelete: "cascade" }),
     path: varchar("path", { length: 255 }),
     url: varchar("url", { length: 255 }),
     orderNum: integer("order_num").notNull(),
@@ -262,7 +262,7 @@ export const propertyCampaigns = pgTable(
     id: serial("id").primaryKey(),
     listingId: integer("listing_id")
       .notNull()
-      .references(() => propertyListings.id),
+      .references(() => propertyListings.id, { onDelete: "cascade" }),
     code: integer("code").notNull(),
   },
   (table) => ({
@@ -280,7 +280,7 @@ export const propertyDealings = pgTable("property_dealings", {
   id: serial("id").primaryKey(),
   listingId: integer("listing_id")
     .notNull()
-    .references(() => propertyListings.id),
+    .references(() => propertyListings.id, { onDelete: "cascade" }),
   code: integer("code").notNull(),
   type: varchar("type", { length: 50 }).notNull(), // 'dealing' or 'advertisement_reprint'
   createdAt: timestamp("created_at").defaultNow(),
@@ -296,7 +296,7 @@ export const propertyAdvertisementFees = pgTable(
     id: serial("id").primaryKey(),
     listingId: integer("listing_id")
       .notNull()
-      .references(() => propertyListings.id),
+      .references(() => propertyListings.id, { onDelete: "cascade" }),
     amount: integer("amount").notNull(),
     code: integer("code").notNull(),
     isActive: boolean("is_active").notNull().default(true),
@@ -312,7 +312,7 @@ export const propertyMonthlies = pgTable("property_monthlies", {
   id: serial("id").primaryKey(),
   listingId: integer("listing_id")
     .notNull()
-    .references(() => propertyListings.id),
+    .references(() => propertyListings.id, { onDelete: "cascade" }),
   isMonthly: integer("is_monthly"),
   monthlyDayCost: integer("monthly_day_cost"),
   monthlyCleaningCost: integer("monthly_cleaning_cost"),

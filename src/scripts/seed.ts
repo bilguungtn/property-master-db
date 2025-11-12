@@ -1,8 +1,8 @@
 import { getDatabase, closeDatabase } from "../client";
 import {
   stores,
-  propertiesBuilding,
-  properties,
+  buildings,
+  rooms,
   propertyLocations,
   propertyRoutes,
   propertyTranslations,
@@ -38,11 +38,11 @@ async function seed() {
     // ============================================
 
     const [building] = await db
-      .insert(propertiesBuilding)
+      .insert(buildings)
       .values({
         buildingName: "Tokyo Central Tower",
-        buildingTypeCode: 1,
-        structureTypeCode: 1,
+        buildingTypeCode: "apartment",
+        structureTypeCode: "reinforced_concrete",
         builtYear: 2020,
         builtMonth: 6,
         maxFloor: 10,
@@ -55,16 +55,17 @@ async function seed() {
 
     // Create location for the building
     await db.insert(propertyLocations).values({
-      propertiesBuildingId: building.id,
+      buildingId: building.id,
       longitude: "139.7671248",
       latitude: "35.6812362",
     });
 
     // Create route for the building
     await db.insert(propertyRoutes).values({
-      propertiesBuildingId: building.id,
+      buildingId: building.id,
       stationCode: "ST001",
       stationId: 1,
+      railroadId: 1,
       railroadCode: "RR001",
       transportationTypeCode: 1,
       minutes: 5,
@@ -72,7 +73,7 @@ async function seed() {
 
     // Create translation for the building
     await db.insert(propertyTranslations).values({
-      propertiesBuildingId: building.id,
+      buildingId: building.id,
       locale: "en",
       addressDetail: "1-1-1 Chiyoda, Tokyo",
       remarks: "Modern building in central Tokyo",
@@ -83,15 +84,15 @@ async function seed() {
     console.log("✅ Created location, route, and translation");
 
     // ============================================
-    // CREATE PROPERTIES (ROOMS)
+    // CREATE ROOMS
     // ============================================
 
-    // Property 1: Room 101
-    const [property1] = await db
-      .insert(properties)
+    // Room 1: Room 101
+    const [room1] = await db
+      .insert(rooms)
       .values({
         uuid: crypto.randomUUID(),
-        propertiesBuildingId: building.id,
+        buildingId: building.id,
         storeId: store.id,
         roomNumber: "101",
         roomSize: 45.5,
@@ -102,12 +103,12 @@ async function seed() {
       })
       .returning();
 
-    // Property 2: Room 201
-    const [property2] = await db
-      .insert(properties)
+    // Room 2: Room 201
+    const [room2] = await db
+      .insert(rooms)
       .values({
         uuid: crypto.randomUUID(),
-        propertiesBuildingId: building.id,
+        buildingId: building.id,
         storeId: store.id,
         roomNumber: "201",
         roomSize: 55.0,
@@ -118,17 +119,19 @@ async function seed() {
       })
       .returning();
 
-    console.log("✅ Created 2 properties (rooms)");
+    console.log("✅ Created 2 rooms");
 
     // ============================================
-    // CREATE LISTING 1 (for Property 1)
+    // CREATE LISTING 1 (for Room 1)
     // ============================================
 
     const [listing1] = await db
       .insert(propertyListings)
       .values({
-        propertyId: property1.id,
+        roomUuid: room1.uuid,
         publishedAt: new Date("2024-01-01"),
+        availableMoveInYear: 2024,
+        availableMoveInMonth: 2,
         availableMoveInTimingCode: 1,
         isActive: true,
         storeId: store.id,
@@ -237,14 +240,16 @@ async function seed() {
     console.log("✅ Created images, facilities, conditions, campaign, and dealing for listing 1");
 
     // ============================================
-    // CREATE LISTING 2 (for Property 2)
+    // CREATE LISTING 2 (for Room 2)
     // ============================================
 
     const [listing2] = await db
       .insert(propertyListings)
       .values({
-        propertyId: property2.id,
+        roomUuid: room2.uuid,
         publishedAt: new Date("2024-02-01"),
+        availableMoveInYear: 2024,
+        availableMoveInMonth: 3,
         availableMoveInTimingCode: 1,
         isActive: true,
         storeId: store.id,
@@ -314,7 +319,7 @@ async function seed() {
     console.log("📊 Summary:");
     console.log("   - 1 store");
     console.log("   - 1 building with location, route, and translation");
-    console.log("   - 2 properties (rooms)");
+    console.log("   - 2 rooms");
     console.log("   - 2 listings with full details");
     console.log("   - 3 total cost records (demonstrating one-to-many)");
     console.log("   - 3 total monthly options (demonstrating one-to-many)");

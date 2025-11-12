@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
 import {
   stores,
-  propertiesBuilding,
-  properties,
+  buildings,
+  rooms,
   propertyLocations,
   propertyRoutes,
   propertyTranslations,
@@ -22,54 +22,55 @@ import {
 // ============================================
 
 export const storesRelations = relations(stores, ({ many }) => ({
-  properties: many(properties),
+  rooms: many(rooms),
   listings: many(propertyListings),
 }));
 
-export const propertiesBuildingRelations = relations(
-  propertiesBuilding,
+export const buildingsRelations = relations(
+  buildings,
   ({ many }) => ({
-    properties: many(properties),
+    rooms: many(rooms),
     locations: many(propertyLocations),
     routes: many(propertyRoutes),
     translations: many(propertyTranslations),
   }),
 );
 
-export const propertiesRelations = relations(properties, ({ one, many }) => ({
-  building: one(propertiesBuilding, {
-    fields: [properties.propertiesBuildingId],
-    references: [propertiesBuilding.id],
+export const roomsRelations = relations(rooms, ({ one, many }) => ({
+  building: one(buildings, {
+    fields: [rooms.buildingId],
+    references: [buildings.id],
   }),
   store: one(stores, {
-    fields: [properties.storeId],
+    fields: [rooms.storeId],
     references: [stores.id],
   }),
+  listings: many(propertyListings),
 }));
 
 export const propertyLocationsRelations = relations(
   propertyLocations,
   ({ one }) => ({
-    building: one(propertiesBuilding, {
-      fields: [propertyLocations.propertiesBuildingId],
-      references: [propertiesBuilding.id],
+    building: one(buildings, {
+      fields: [propertyLocations.buildingId],
+      references: [buildings.id],
     }),
   }),
 );
 
 export const propertyRoutesRelations = relations(propertyRoutes, ({ one }) => ({
-  building: one(propertiesBuilding, {
-    fields: [propertyRoutes.propertiesBuildingId],
-    references: [propertiesBuilding.id],
+  building: one(buildings, {
+    fields: [propertyRoutes.buildingId],
+    references: [buildings.id],
   }),
 }));
 
 export const propertyTranslationsRelations = relations(
   propertyTranslations,
   ({ one }) => ({
-    building: one(propertiesBuilding, {
-      fields: [propertyTranslations.propertiesBuildingId],
-      references: [propertiesBuilding.id],
+    building: one(buildings, {
+      fields: [propertyTranslations.buildingId],
+      references: [buildings.id],
     }),
   }),
 );
@@ -81,9 +82,9 @@ export const propertyTranslationsRelations = relations(
 export const propertyListingsRelations = relations(
   propertyListings,
   ({ one, many }) => ({
-    property: one(properties, {
-      fields: [propertyListings.propertyId],
-      references: [properties.id],
+    room: one(rooms, {
+      fields: [propertyListings.roomUuid],
+      references: [rooms.uuid],
     }),
     store: one(stores, {
       fields: [propertyListings.storeId],
