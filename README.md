@@ -18,10 +18,11 @@ The database is organized into two main groups:
 #### 1. **Immutable Property Data** (Physical Characteristics)
 Tables that represent physical building and property information that rarely changes:
 
-- `properties_building` - Building information (name, type, structure, built year)
-- `properties` - Individual rooms/units in buildings
+- `stores` - Property management stores
+- `buildings` - Building information (name, type, structure, built year)
+- `rooms` - Individual rooms/units in buildings (identified by UUID)
 - `property_locations` - Geographic coordinates (longitude, latitude)
-- `property_routes` - Transportation access (stations, travel time)
+- `property_routes` - Transportation access (stations, travel time, railroad info)
 - `property_translations` - Localized content (address details, descriptions)
 
 #### 2. **Changeable Listing Data** (Rental Information)
@@ -39,9 +40,10 @@ Tables that represent rental information that changes frequently:
 - `property_monthlies` - Monthly rental options
 
 This separation enables:
-- Multiple listings per property over time
+- Multiple listings per room over time
 - Historical tracking of pricing changes
 - Efficient updates without duplicating physical data
+- Cascade deletion ensures referential integrity across all relationships
 
 ## Installation
 
@@ -115,231 +117,6 @@ pnpm db:push
 pnpm db:seed
 ```
 
-## Usage
-
-### In NestJS Backend Services
-
-#### 1. Add Package Dependency
-
-```json
-// apps/backend/your-service/package.json
-{
-  "dependencies": {
-    "property_database": "workspace:*"
-  }
-}
-```
-
-#### 2. Use in Services
-
-```typescript
-// apps/backend/your-service/src/modules/property/property.service.ts
-import { Injectable } from '@nestjs/common';
-import { getDatabase, propertyListings, properties } from 'property_database';
-
-@Injectable()
-export class PropertyService {
-  private db = getDatabase();
-
-  async findAll() {
-    return await this.db.query.propertyListings.findMany({
-      with: {
-        property: {
-          with: {
-            building: true,
-          },
-        },
-        costs: true,
-        images: true,
-      },
-      limit: 10,
-    });
-  }
-
-  async findById(id: number) {
-    return await this.db.query.propertyListings.findFirst({
-      where: (listings, { eq }) => eq(listings.id, id),
-      with: {
-        property: {
-          with: {
-            building: {
-              with: {
-                locations: true,
-                routes: true,
-                translations: true,
-              },
-            },
-          },
-        },
-        costs: true,
-        images: true,
-        facilities: true,
-        conditions: true,
-      },
-    });
-  }
-}
-```
-
-### Direct Database Operations
-
-#### Query Examples
-
-```typescript
-import {
-  getDatabase,
-  propertyListings,
-  properties,
-  propertiesBuilding,
-} from 'property_database';
-import { eq, and, gte, lte } from 'drizzle-orm';
-
-const db = getDatabase();
-
-// Query with relations using query API (recommended)
-const listings = await db.query.propertyListings.findMany({
-  with: {
-    property: {
-      with: {
-        building: true,
-      },
-    },
-    costs: true,
-  },
-  where: (listings, { eq }) => eq(listings.isActive, 1),
-});
-
-// Query with joins using SQL-like syntax
-const results = await db
-  .select()
-  .from(propertyListings)
-  .innerJoin(properties, eq(propertyListings.propertyId, properties.id))
-  .innerJoin(
-    propertiesBuilding,
-    eq(properties.propertiesBuildingId, propertiesBuilding.id),
-  )
-  .where(
-    and(
-      eq(propertyListings.isActive, 1),
-      gte(properties.roomSize, 40),
-      lte(properties.roomSize, 60),
-    ),
-  );
-```
-
-#### Insert Examples
-
-```typescript
-import {
-  getDatabase,
-  propertiesBuilding,
-  properties,
-  propertyListings,
-  propertyCosts,
-} from 'property_database';
-
-const db = getDatabase();
-
-// Insert building
-const [building] = await db
-  .insert(propertiesBuilding)
-  .values({
-    buildingName: 'Tokyo Tower Residence',
-    buildingTypeCode: 1,
-    structureTypeCode: 1,
-    builtYear: 2022,
-    builtMonth: 4,
-    maxFloor: 15,
-    prefectureCode: '13',
-    cityCode: '101',
-  })
-  .returning();
-
-// Insert property (room)
-const [property] = await db
-  .insert(properties)
-  .values({
-    uuid: crypto.randomUUID(),
-    propertiesBuildingId: building.id,
-    roomNumber: '301',
-    roomSize: 55.0,
-    layoutAmount: 2,
-    layoutTypeCode: 1,
-    floor: 3,
-  })
-  .returning();
-
-// Insert listing with costs in a transaction
-await db.transaction(async (tx) => {
-  const [listing] = await tx
-    .insert(propertyListings)
-    .values({
-      propertyId: property.id,
-      publishedAt: new Date(),
-      availableMoveInTimingCode: 1,
-      isActive: 1,
-      storeId: 1,
-    })
-    .returning();
-
-  await tx.insert(propertyCosts).values({
-    listingId: listing.id,
-    rent: 150000,
-    managementFee: 12000,
-    depositPrice: 150000,
-    depositMonth: 1,
-    residenceInsuranceNeeded: 1,
-  });
-});
-```
-
-#### Update Examples
-
-```typescript
-import { getDatabase, propertyListings, propertyCosts } from 'property_database';
-import { eq } from 'drizzle-orm';
-
-const db = getDatabase();
-
-// Update listing status
-await db
-  .update(propertyListings)
-  .set({ isActive: 0 })
-  .where(eq(propertyListings.id, 1));
-
-// Update costs
-await db
-  .update(propertyCosts)
-  .set({
-    rent: 160000,
-    managementFee: 13000,
-  })
-  .where(eq(propertyCosts.listingId, 1));
-```
-
-### Type Inference
-
-Drizzle provides excellent TypeScript inference:
-
-```typescript
-import type { InferSelectModel, InferInsertModel } from 'property_database';
-import { propertyListings, propertiesBuilding } from 'property_database';
-
-// Select types (what you get from queries)
-type PropertyListing = InferSelectModel<typeof propertyListings>;
-type Building = InferSelectModel<typeof propertiesBuilding>;
-
-// Insert types (what you need to insert)
-type NewPropertyListing = InferInsertModel<typeof propertyListings>;
-type NewBuilding = InferInsertModel<typeof propertiesBuilding>;
-
-// Use in function signatures
-async function createListing(data: NewPropertyListing): Promise<PropertyListing> {
-  const [listing] = await db.insert(propertyListings).values(data).returning();
-  return listing;
-}
-```
-
 ## Available Scripts
 
 | Script | Description |
@@ -354,49 +131,69 @@ async function createListing(data: NewPropertyListing): Promise<PropertyListing>
 ## Database Schema Diagram
 
 ```
-┌─────────────────────┐
-│ properties_building │
-│                     │
-│ - id (PK)           │
-│ - building_name     │
-│ - building_type_code│
-│ - prefecture_code   │
-│ - city_code         │
-└─────────┬───────────┘
-          │
-          ├──────┬──────────┬────────────────┐
-          │      │          │                │
-          ▼      ▼          ▼                ▼
-┌─────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────────┐
-│ properties  │ │ property_    │ │ property_    │ │ property_        │
-│             │ │ locations    │ │ routes       │ │ translations     │
-│ - id (PK)   │ │              │ │              │ │                  │
-│ - uuid      │ │ - longitude  │ │ - station_id │ │ - locale         │
-│ - room_no   │ │ - latitude   │ │ - minutes    │ │ - address_detail │
-└──────┬──────┘ └──────────────┘ └──────────────┘ └──────────────────┘
-       │
-       │
-       ▼
-┌──────────────────┐
-│ property_        │
-│ listings         │
-│                  │
-│ - id (PK)        │
-│ - property_id    │
-│ - published_at   │
-│ - is_active      │
-└────────┬─────────┘
-         │
-         ├────────┬──────────┬───────────┬─────────────┐
-         │        │          │           │             │
-         ▼        ▼          ▼           ▼             ▼
-┌────────────┐ ┌────────────┐ ┌───────────┐ ┌──────────┐ ┌──────────┐
-│ property_  │ │ property_  │ │ property_ │ │ property_│ │ property_│
-│ costs      │ │ images     │ │ facilities│ │ campaigns│ │ monthlies│
-│            │ │            │ │           │ │          │ │          │
-│ - rent     │ │ - url      │ │ - code    │ │ - code   │ │ - is_    │
-│ - deposit  │ │ - order    │ │ - status  │ │          │ │   monthly│
-└────────────┘ └────────────┘ └───────────┘ └──────────┘ └──────────┘
+                    ┌────────────┐
+                    │   stores   │
+                    │            │
+                    │ - id (PK)  │
+                    └──────┬─────┘
+                           │
+                ┌──────────┴─────────────┐
+                │                        │
+                ▼                        ▼
+┌─────────────────────────┐    ┌──────────────────────┐
+│       buildings         │    │  property_listings   │
+│                         │    │                      │
+│ - id (PK)               │    │ - id (PK)            │
+│ - building_name         │    │ - room_uuid (FK)     │
+│ - building_type_code    │◄───┼─┐ - store_id (FK)   │
+│   (varchar)             │    │ │ - published_at     │
+│ - structure_type_code   │    │ │ - is_active (bool) │
+│   (varchar)             │    │ │ - move_in_year     │
+│ - prefecture_code       │    │ │ - move_in_month    │
+│ - city_code             │    │ │                    │
+└───────┬─────────────────┘    └─┼────────┬───────────┘
+        │                        │        │
+        ├──────┬──────────┬──────┴────┐   │
+        │      │          │           │   │
+        ▼      ▼          ▼           ▼   │
+┌─────────┐ ┌──────────┐ ┌───────────┐ ┌──────────┐
+│property_│ │property_ │ │ property_ │ │  rooms   │
+│locations│ │routes    │ │translation│ │          │
+│         │ │          │ │           │ │ - uuid   │
+│-building│ │-building │ │ -building │ │   (PK)   │
+│  _id    │ │  _id     │ │   _id     │ │ -building│
+│-long    │ │-station  │ │ -locale   │ │   _id(FK)│
+│-lat     │ │-railroad │ │ -address  │ │ -store_id│
+│         │ │  _id     │ │           │ │   (FK)   │
+└─────────┘ │-minutes  │ └───────────┘ │ -room_   │
+            └──────────┘                 │  number │
+                                        │ -room_   │
+                                        │  size    │
+                                        │ -floor   │
+                                        └─────┬────┘
+                                              │
+                                              │
+             ┌────────────────────────────────┘
+             │
+             │
+             ▼ (via room_uuid)
+┌─────────────────────────────────────────────────────┐
+│                  property_listings                  │
+│                                                     │
+└──┬──────┬──────────┬───────────┬─────────┬─────────┘
+   │      │          │           │         │
+   ▼      ▼          ▼           ▼         ▼
+┌──────┐ ┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│costs │ │images│ │facility│ │campaign│ │monthly │
+│      │ │      │ │        │ │        │ │        │
+│-list │ │-list │ │ -list  │ │ -list  │ │ -list  │
+│ _id  │ │ _id  │ │  _id   │ │  _id   │ │  _id   │
+│-rent │ │-url  │ │ -code  │ │ -code  │ │ -is_   │
+│-mgmt │ │-order│ │        │ │        │ │monthly │
+│ _fee │ │ _num │ │        │ │        │ │        │
+└──────┘ └──────┘ └────────┘ └────────┘ └────────┘
+
+Note: All foreign keys have cascade delete for referential integrity
 ```
 
 ## Drizzle Studio
@@ -436,48 +233,8 @@ pnpm db:push
 
 ⚠️ **Warning**: Use `db:push` only in development. Production should use migrations.
 
-## Best Practices
 
-### 1. Use Transactions for Related Inserts
-
-```typescript
-await db.transaction(async (tx) => {
-  const [listing] = await tx.insert(propertyListings).values(...).returning();
-  await tx.insert(propertyCosts).values({ listingId: listing.id, ... });
-  await tx.insert(propertyImages).values([...]);
-});
-```
-
-### 2. Leverage Type Safety
-
-```typescript
-// TypeScript will catch errors
-const listing = await db.query.propertyListings.findFirst({
-  with: {
-    costs: true, // Auto-complete knows this relation exists
-  },
-});
-
-console.log(listing?.costs?.rent); // Type: number | null | undefined
-```
-
-### 3. Use Query API for Relations
-
-```typescript
-// Preferred (cleaner, type-safe)
-const listings = await db.query.propertyListings.findMany({
-  with: {
-    property: {
-      with: { building: true },
-    },
-    costs: true,
-  },
-});
-
-// Instead of manual joins
-```
-
-### 4. Close Connections in Scripts
+### 5. Close Connections in Scripts
 
 ```typescript
 import { closeDatabase } from 'property_database';
