@@ -63,16 +63,33 @@ From **any backend service** that needs it:
 
 ### 1. Database Setup
 
-#### Option A: Using Docker (Recommended)
+#### Option A: Using Docker Compose (Recommended)
+
+Start the PostgreSQL database with Docker Compose:
 
 ```bash
-docker run --name property-postgres \
-  -e POSTGRES_DB=property_db \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -p 5432:5432 \
-  -d postgres:14
+# Start database in detached mode
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f postgres
+
+# Stop database
+docker-compose down
+
+# Stop and remove data volume
+docker-compose down -v
 ```
+
+The `docker-compose.yaml` configuration includes:
+- PostgreSQL 16 (Alpine)
+- Database: `property_db`
+- Port: `5432`
+- Persistent volume for data storage
+- Health checks
 
 #### Option B: Local PostgreSQL
 
