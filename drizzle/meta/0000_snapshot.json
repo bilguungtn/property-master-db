@@ -1,5 +1,5 @@
 {
-  "id": "091ba811-025d-4043-bfdb-6b3de86d9d0d",
+  "id": "14703498-f927-4fbf-b555-cec8dba9dc57",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1028,6 +1028,36 @@
           "columns": [
             {
               "expression": "station_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "property_routes_railroad_code_idx": {
+          "name": "property_routes_railroad_code_idx",
+          "columns": [
+            {
+              "expression": "railroad_code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "property_routes_railroad_id_idx": {
+          "name": "property_routes_railroad_id_idx",
+          "columns": [
+            {
+              "expression": "railroad_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

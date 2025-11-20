@@ -3,73 +3,73 @@ import {
   stores,
   buildings,
   rooms,
-  propertyLocations,
-  propertyRoutes,
-  propertyTranslations,
-  propertyListings,
-  propertyCosts,
-  propertyFacilities,
-  propertyConditions,
-  propertyImages,
-  propertyCampaigns,
-  propertyDealings,
-  propertyAdvertisementFees,
-  propertyMonthlies,
+  property_locations,
+  property_routes,
+  property_translations,
+  property_listings,
+  property_costs,
+  property_facilities,
+  property_conditions,
+  property_images,
+  property_campaigns,
+  property_dealings,
+  property_advertisement_fees,
+  property_monthlies,
 } from "./schemas";
 
 // ============================================
 // RELATIONS - IMMUTABLE SCHEMAS
 // ============================================
 
-export const storesRelations = relations(stores, ({ many }) => ({
+export const stores_relations = relations(stores, ({ many }) => ({
   rooms: many(rooms),
-  listings: many(propertyListings),
+  listings: many(property_listings),
 }));
 
-export const buildingsRelations = relations(
+export const buildings_relations = relations(
   buildings,
   ({ many }) => ({
     rooms: many(rooms),
-    locations: many(propertyLocations),
-    routes: many(propertyRoutes),
-    translations: many(propertyTranslations),
+    locations: many(property_locations),
+    routes: many(property_routes),
+    translations: many(property_translations),
   }),
 );
 
-export const roomsRelations = relations(rooms, ({ one, many }) => ({
+export const rooms_relations = relations(rooms, ({ one, many }) => ({
   building: one(buildings, {
-    fields: [rooms.buildingId],
+    fields: [rooms.building_id],
     references: [buildings.id],
   }),
   store: one(stores, {
-    fields: [rooms.storeId],
+    fields: [rooms.store_id],
     references: [stores.id],
   }),
-  listings: many(propertyListings),
+  listings: many(property_listings),
 }));
 
-export const propertyLocationsRelations = relations(
-  propertyLocations,
+export const property_locations_relations = relations(
+  property_locations,
   ({ one }) => ({
     building: one(buildings, {
-      fields: [propertyLocations.buildingId],
+      fields: [property_locations.building_id],
       references: [buildings.id],
     }),
   }),
 );
 
-export const propertyRoutesRelations = relations(propertyRoutes, ({ one }) => ({
+export const property_routes_relations = relations(property_routes, ({ one }) => ({
   building: one(buildings, {
-    fields: [propertyRoutes.buildingId],
+    fields: [property_routes.building_id],
     references: [buildings.id],
   }),
 }));
 
-export const propertyTranslationsRelations = relations(
-  propertyTranslations,
+export const property_translations_relations = relations(
+  property_translations,
   ({ one }) => ({
     building: one(buildings, {
-      fields: [propertyTranslations.buildingId],
+      fields: [property_translations.building_id],
       references: [buildings.id],
     }),
   }),
@@ -79,98 +79,98 @@ export const propertyTranslationsRelations = relations(
 // RELATIONS - CHANGEABLE SCHEMAS
 // ============================================
 
-export const propertyListingsRelations = relations(
-  propertyListings,
+export const property_listings_relations = relations(
+  property_listings,
   ({ one, many }) => ({
     room: one(rooms, {
-      fields: [propertyListings.roomUuid],
+      fields: [property_listings.room_uuid],
       references: [rooms.uuid],
     }),
     store: one(stores, {
-      fields: [propertyListings.storeId],
+      fields: [property_listings.store_id],
       references: [stores.id],
     }),
-    costs: many(propertyCosts),
-    facilities: many(propertyFacilities),
-    conditions: many(propertyConditions),
-    images: many(propertyImages),
-    campaigns: many(propertyCampaigns),
-    dealings: many(propertyDealings),
-    advertisementFees: many(propertyAdvertisementFees),
-    monthlies: many(propertyMonthlies),
+    costs: many(property_costs),
+    facilities: many(property_facilities),
+    conditions: many(property_conditions),
+    images: many(property_images),
+    campaigns: many(property_campaigns),
+    dealings: many(property_dealings),
+    advertisement_fees: many(property_advertisement_fees),
+    monthlies: many(property_monthlies),
   }),
 );
 
-export const propertyCostsRelations = relations(propertyCosts, ({ one }) => ({
-  listing: one(propertyListings, {
-    fields: [propertyCosts.listingId],
-    references: [propertyListings.id],
+export const property_costs_relations = relations(property_costs, ({ one }) => ({
+  listing: one(property_listings, {
+    fields: [property_costs.listing_id],
+    references: [property_listings.id],
   }),
 }));
 
-export const propertyFacilitiesRelations = relations(
-  propertyFacilities,
+export const property_facilities_relations = relations(
+  property_facilities,
   ({ one }) => ({
-    listing: one(propertyListings, {
-      fields: [propertyFacilities.listingId],
-      references: [propertyListings.id],
+    listing: one(property_listings, {
+      fields: [property_facilities.listing_id],
+      references: [property_listings.id],
     }),
   }),
 );
 
-export const propertyConditionsRelations = relations(
-  propertyConditions,
+export const property_conditions_relations = relations(
+  property_conditions,
   ({ one }) => ({
-    listing: one(propertyListings, {
-      fields: [propertyConditions.listingId],
-      references: [propertyListings.id],
+    listing: one(property_listings, {
+      fields: [property_conditions.listing_id],
+      references: [property_listings.id],
     }),
   }),
 );
 
-export const propertyImagesRelations = relations(propertyImages, ({ one }) => ({
-  listing: one(propertyListings, {
-    fields: [propertyImages.listingId],
-    references: [propertyListings.id],
+export const property_images_relations = relations(property_images, ({ one }) => ({
+  listing: one(property_listings, {
+    fields: [property_images.listing_id],
+    references: [property_listings.id],
   }),
 }));
 
-export const propertyCampaignsRelations = relations(
-  propertyCampaigns,
+export const property_campaigns_relations = relations(
+  property_campaigns,
   ({ one }) => ({
-    listing: one(propertyListings, {
-      fields: [propertyCampaigns.listingId],
-      references: [propertyListings.id],
+    listing: one(property_listings, {
+      fields: [property_campaigns.listing_id],
+      references: [property_listings.id],
     }),
   }),
 );
 
-export const propertyDealingsRelations = relations(
-  propertyDealings,
+export const property_dealings_relations = relations(
+  property_dealings,
   ({ one }) => ({
-    listing: one(propertyListings, {
-      fields: [propertyDealings.listingId],
-      references: [propertyListings.id],
+    listing: one(property_listings, {
+      fields: [property_dealings.listing_id],
+      references: [property_listings.id],
     }),
   }),
 );
 
-export const propertyAdvertisementFeesRelations = relations(
-  propertyAdvertisementFees,
+export const property_advertisement_fees_relations = relations(
+  property_advertisement_fees,
   ({ one }) => ({
-    listing: one(propertyListings, {
-      fields: [propertyAdvertisementFees.listingId],
-      references: [propertyListings.id],
+    listing: one(property_listings, {
+      fields: [property_advertisement_fees.listing_id],
+      references: [property_listings.id],
     }),
   }),
 );
 
-export const propertyMonthliesRelations = relations(
-  propertyMonthlies,
+export const property_monthlies_relations = relations(
+  property_monthlies,
   ({ one }) => ({
-    listing: one(propertyListings, {
-      fields: [propertyMonthlies.listingId],
-      references: [propertyListings.id],
+    listing: one(property_listings, {
+      fields: [property_monthlies.listing_id],
+      references: [property_listings.id],
     }),
   }),
 );

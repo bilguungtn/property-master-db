@@ -1,19 +1,20 @@
+import "dotenv/config";
 import { getDatabase, closeDatabase } from "../client";
 import {
   stores,
   buildings,
   rooms,
-  propertyLocations,
-  propertyRoutes,
-  propertyTranslations,
-  propertyListings,
-  propertyCosts,
-  propertyImages,
-  propertyFacilities,
-  propertyConditions,
-  propertyCampaigns,
-  propertyDealings,
-  propertyMonthlies,
+  property_locations,
+  property_routes,
+  property_translations,
+  property_listings,
+  property_costs,
+  property_images,
+  property_facilities,
+  property_conditions,
+  property_campaigns,
+  property_dealings,
+  property_monthlies,
 } from "../schema";
 
 /**
@@ -40,44 +41,44 @@ async function seed() {
     const [building] = await db
       .insert(buildings)
       .values({
-        buildingName: "Tokyo Central Tower",
-        buildingTypeCode: "apartment",
-        structureTypeCode: "reinforced_concrete",
-        builtYear: 2020,
-        builtMonth: 6,
-        maxFloor: 10,
-        prefectureCode: "13",
-        cityCode: "101",
+        building_name: "Tokyo Central Tower",
+        building_type_code: "apartment",
+        structure_type_code: "reinforced_concrete",
+        built_year: 2020,
+        built_month: 6,
+        max_floor: 10,
+        prefecture_code: "13",
+        city_code: "101",
       })
       .returning();
 
-    console.log("✅ Created building:", building.buildingName);
+    console.log("✅ Created building:", building.building_name);
 
     // Create location for the building
-    await db.insert(propertyLocations).values({
-      buildingId: building.id,
+    await db.insert(property_locations).values({
+      building_id: building.id,
       longitude: "139.7671248",
       latitude: "35.6812362",
     });
 
     // Create route for the building
-    await db.insert(propertyRoutes).values({
-      buildingId: building.id,
-      stationCode: "ST001",
-      stationId: 1,
-      railroadId: 1,
-      railroadCode: "RR001",
-      transportationTypeCode: 1,
+    await db.insert(property_routes).values({
+      building_id: building.id,
+      station_code: "ST001",
+      station_id: 1,
+      railroad_id: 1,
+      railroad_code: "RR001",
+      transportation_type_code: 1,
       minutes: 5,
     });
 
     // Create translation for the building
-    await db.insert(propertyTranslations).values({
-      buildingId: building.id,
+    await db.insert(property_translations).values({
+      building_id: building.id,
       locale: "en",
-      addressDetail: "1-1-1 Chiyoda, Tokyo",
+      address_detail: "1-1-1 Chiyoda, Tokyo",
       remarks: "Modern building in central Tokyo",
-      sideNote: "Near shopping and restaurants",
+      side_note: "Near shopping and restaurants",
       catchphrase: "Your perfect home in the heart of Tokyo!",
     });
 
@@ -92,13 +93,13 @@ async function seed() {
       .insert(rooms)
       .values({
         uuid: crypto.randomUUID(),
-        buildingId: building.id,
-        storeId: store.id,
-        roomNumber: "101",
-        roomSize: 45.5,
-        directionCode: 1,
-        layoutAmount: 2,
-        layoutTypeCode: 1,
+        building_id: building.id,
+        store_id: store.id,
+        room_number: "101",
+        room_size: 45.5,
+        direction_code: 1,
+        layout_amount: 2,
+        layout_type_code: 1,
         floor: 1,
       })
       .returning();
@@ -108,13 +109,13 @@ async function seed() {
       .insert(rooms)
       .values({
         uuid: crypto.randomUUID(),
-        buildingId: building.id,
-        storeId: store.id,
-        roomNumber: "201",
-        roomSize: 55.0,
-        directionCode: 2,
-        layoutAmount: 3,
-        layoutTypeCode: 1,
+        building_id: building.id,
+        store_id: store.id,
+        room_number: "201",
+        room_size: 55.0,
+        direction_code: 2,
+        layout_amount: 3,
+        layout_type_code: 1,
         floor: 2,
       })
       .returning();
@@ -126,113 +127,113 @@ async function seed() {
     // ============================================
 
     const [listing1] = await db
-      .insert(propertyListings)
+      .insert(property_listings)
       .values({
-        roomUuid: room1.uuid,
-        publishedAt: new Date("2024-01-01"),
-        availableMoveInYear: 2024,
-        availableMoveInMonth: 2,
-        availableMoveInTimingCode: 1,
-        isActive: true,
-        storeId: store.id,
+        room_uuid: room1.uuid,
+        published_at: new Date("2024-01-01"),
+        available_move_in_year: 2024,
+        available_move_in_month: 2,
+        available_move_in_timing_code: 1,
+        is_active: true,
+        store_id: store.id,
       })
       .returning();
 
     console.log("✅ Created listing 1");
 
     // Multiple costs for listing 1 (price history - one-to-many)
-    await db.insert(propertyCosts).values([
+    await db.insert(property_costs).values([
       {
-        listingId: listing1.id,
+        listing_id: listing1.id,
         rent: 120000,
-        managementFee: 10000,
-        depositPrice: 120000,
-        depositMonth: 1,
-        gratuityFeePrice: 120000,
-        gratuityFeeMonth: 1,
-        residenceInsuranceNeeded: true,
+        management_fee: 10000,
+        deposit_price: 120000,
+        deposit_month: 1,
+        gratuity_fee_price: 120000,
+        gratuity_fee_month: 1,
+        residence_insurance_needed: true,
       },
       {
-        listingId: listing1.id,
+        listing_id: listing1.id,
         rent: 125000, // Price increased
-        managementFee: 10000,
-        depositPrice: 125000,
-        depositMonth: 1,
-        gratuityFeePrice: 125000,
-        gratuityFeeMonth: 1,
-        residenceInsuranceNeeded: true,
+        management_fee: 10000,
+        deposit_price: 125000,
+        deposit_month: 1,
+        gratuity_fee_price: 125000,
+        gratuity_fee_month: 1,
+        residence_insurance_needed: true,
       },
     ]);
 
     // Multiple monthly options for listing 1 (one-to-many)
-    await db.insert(propertyMonthlies).values([
+    await db.insert(property_monthlies).values([
       {
-        listingId: listing1.id,
-        isMonthly: 1,
-        monthlyDayCost: 5000,
-        monthlyCleaningCost: 3000,
-        monthlyBedCost: 2000,
-        monthlyFee: 10000,
+        listing_id: listing1.id,
+        is_monthly: 1,
+        monthly_day_cost: 5000,
+        monthly_cleaning_cost: 3000,
+        monthly_bed_cost: 2000,
+        monthly_fee: 10000,
       },
       {
-        listingId: listing1.id,
-        isMonthly: 1,
-        monthlyDayCost: 4500, // Discounted rate
-        monthlyCleaningCost: 3000,
-        monthlyBedCost: 2000,
-        monthlyFee: 9500,
+        listing_id: listing1.id,
+        is_monthly: 1,
+        monthly_day_cost: 4500, // Discounted rate
+        monthly_cleaning_cost: 3000,
+        monthly_bed_cost: 2000,
+        monthly_fee: 9500,
       },
     ]);
 
     console.log("✅ Created 2 cost records and 2 monthly options (one-to-many)");
 
     // Images for listing 1
-    await db.insert(propertyImages).values([
+    await db.insert(property_images).values([
       {
         id: crypto.randomUUID(),
-        listingId: listing1.id,
+        listing_id: listing1.id,
         url: "https://example.com/images/property1-exterior.jpg",
-        orderNum: 1,
-        typeCode: 1, // Exterior
+        order_num: 1,
+        type_code: 1, // Exterior
       },
       {
         id: crypto.randomUUID(),
-        listingId: listing1.id,
+        listing_id: listing1.id,
         url: "https://example.com/images/property1-interior.jpg",
-        orderNum: 2,
-        typeCode: 2, // Interior
+        order_num: 2,
+        type_code: 2, // Interior
       },
       {
         id: crypto.randomUUID(),
-        listingId: listing1.id,
+        listing_id: listing1.id,
         url: "https://example.com/images/property1-floorplan.jpg",
-        orderNum: 3,
-        typeCode: 3, // Floor plan
+        order_num: 3,
+        type_code: 3, // Floor plan
       },
     ]);
 
     // Facilities for listing 1
-    await db.insert(propertyFacilities).values([
-      { listingId: listing1.id, code: 1 }, // Elevator
-      { listingId: listing1.id, code: 2 }, // Parking
-      { listingId: listing1.id, code: 3 }, // Auto-lock
+    await db.insert(property_facilities).values([
+      { listing_id: listing1.id, code: 1 }, // Elevator
+      { listing_id: listing1.id, code: 2 }, // Parking
+      { listing_id: listing1.id, code: 3 }, // Auto-lock
     ]);
 
     // Conditions for listing 1
-    await db.insert(propertyConditions).values([
-      { listingId: listing1.id, code: 1 }, // Earthquake-resistant
-      { listingId: listing1.id, code: 2 }, // Fire-resistant
+    await db.insert(property_conditions).values([
+      { listing_id: listing1.id, code: 1 }, // Earthquake-resistant
+      { listing_id: listing1.id, code: 2 }, // Fire-resistant
     ]);
 
     // Campaign for listing 1
-    await db.insert(propertyCampaigns).values({
-      listingId: listing1.id,
+    await db.insert(property_campaigns).values({
+      listing_id: listing1.id,
       code: 1, // New Year Campaign
     });
 
     // Dealing for listing 1
-    await db.insert(propertyDealings).values({
-      listingId: listing1.id,
+    await db.insert(property_dealings).values({
+      listing_id: listing1.id,
       code: 1, // Rental only
       type: "dealing",
     });
@@ -244,73 +245,73 @@ async function seed() {
     // ============================================
 
     const [listing2] = await db
-      .insert(propertyListings)
+      .insert(property_listings)
       .values({
-        roomUuid: room2.uuid,
-        publishedAt: new Date("2024-02-01"),
-        availableMoveInYear: 2024,
-        availableMoveInMonth: 3,
-        availableMoveInTimingCode: 1,
-        isActive: true,
-        storeId: store.id,
+        room_uuid: room2.uuid,
+        published_at: new Date("2024-02-01"),
+        available_move_in_year: 2024,
+        available_move_in_month: 3,
+        available_move_in_timing_code: 1,
+        is_active: true,
+        store_id: store.id,
       })
       .returning();
 
     console.log("✅ Created listing 2");
 
     // Multiple costs for listing 2
-    await db.insert(propertyCosts).values([
+    await db.insert(property_costs).values([
       {
-        listingId: listing2.id,
+        listing_id: listing2.id,
         rent: 150000,
-        managementFee: 12000,
-        depositPrice: 150000,
-        depositMonth: 1,
-        gratuityFeePrice: 150000,
-        gratuityFeeMonth: 1,
-        residenceInsuranceNeeded: true,
+        management_fee: 12000,
+        deposit_price: 150000,
+        deposit_month: 1,
+        gratuity_fee_price: 150000,
+        gratuity_fee_month: 1,
+        residence_insurance_needed: true,
       },
     ]);
 
     // Monthly options for listing 2
-    await db.insert(propertyMonthlies).values([
+    await db.insert(property_monthlies).values([
       {
-        listingId: listing2.id,
-        isMonthly: 1,
-        monthlyDayCost: 6000,
-        monthlyCleaningCost: 4000,
-        monthlyBedCost: 3000,
-        monthlyFee: 13000,
+        listing_id: listing2.id,
+        is_monthly: 1,
+        monthly_day_cost: 6000,
+        monthly_cleaning_cost: 4000,
+        monthly_bed_cost: 3000,
+        monthly_fee: 13000,
       },
     ]);
 
     // Images for listing 2
-    await db.insert(propertyImages).values([
+    await db.insert(property_images).values([
       {
         id: crypto.randomUUID(),
-        listingId: listing2.id,
+        listing_id: listing2.id,
         url: "https://example.com/images/property2-exterior.jpg",
-        orderNum: 1,
-        typeCode: 1,
+        order_num: 1,
+        type_code: 1,
       },
       {
         id: crypto.randomUUID(),
-        listingId: listing2.id,
+        listing_id: listing2.id,
         url: "https://example.com/images/property2-interior.jpg",
-        orderNum: 2,
-        typeCode: 2,
+        order_num: 2,
+        type_code: 2,
       },
     ]);
 
     // Facilities for listing 2
-    await db.insert(propertyFacilities).values([
-      { listingId: listing2.id, code: 1 }, // Elevator
-      { listingId: listing2.id, code: 4 }, // Balcony
+    await db.insert(property_facilities).values([
+      { listing_id: listing2.id, code: 1 }, // Elevator
+      { listing_id: listing2.id, code: 4 }, // Balcony
     ]);
 
     // Conditions for listing 2
-    await db.insert(propertyConditions).values([
-      { listingId: listing2.id, code: 1 }, // Earthquake-resistant
+    await db.insert(property_conditions).values([
+      { listing_id: listing2.id, code: 1 }, // Earthquake-resistant
     ]);
 
     console.log("✅ Created complete data for listing 2");

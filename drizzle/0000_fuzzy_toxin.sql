@@ -184,4 +184,6 @@ CREATE INDEX "property_listings_published_at_idx" ON "property_listings" USING b
 CREATE INDEX "property_locations_longitude_idx" ON "property_locations" USING btree ("longitude");--> statement-breakpoint
 CREATE INDEX "property_locations_latitude_idx" ON "property_locations" USING btree ("latitude");--> statement-breakpoint
 CREATE INDEX "property_routes_station_code_idx" ON "property_routes" USING btree ("station_code");--> statement-breakpoint
-CREATE INDEX "property_routes_station_id_idx" ON "property_routes" USING btree ("station_id");
+CREATE INDEX "property_routes_station_id_idx" ON "property_routes" USING btree ("station_id");--> statement-breakpoint
+CREATE INDEX "property_routes_railroad_code_idx" ON "property_routes" USING btree ("railroad_code");--> statement-breakpoint
+CREATE INDEX "property_routes_railroad_id_idx" ON "property_routes" USING btree ("railroad_id");
